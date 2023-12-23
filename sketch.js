@@ -5,9 +5,13 @@ vel2 = new p5.Vector(0, 0)
 let balls = [new Ball(pos1, 20, vel1, 0.89), /*new Ball(pos2, 20, vel2, 0.9)*/]
 let platforms = []
 console.log(balls)
+let note
+
+let translateSpeed = 0
 
 function setup() 
 {
+    note = loadSound('piano-g-6200.mp3')
     let screenRatio = 16/9
     let screenW = 400
     createCanvas(screenW, screenW*screenRatio)
@@ -15,25 +19,31 @@ function setup()
         ball.display()
     })
 
-    generatePlatforms()
+    generateNextPlatform(balls[0], 30)
+    translateSpeed = calculateTranslateSpeed(platforms, 30)
+
+    // Set frame rate
+    frameRate(100)
 }
 
-function generatePlatforms(){
+function generateNextPlatform(ball, interval){
     // Create a base platform
     // platforms.push(new Block(new p5.Vector(width/2, height-10), 300, new p5.Vector(0, 0)))
 
-    // Generate 10 platforms in a loop, each with height slightly less than the previous
-    // Such that they look like steps
+    // Create the next platform such that the ball will collide with it 
+    // after the given interval (in frames)
     let platformWidth = 90
     let platformHeight = 20
-    let platformX = width/2
-    let platformY = height/4
-    let playformVel = new p5.Vector(-1, -0.2) // Moving to the left
-    for(let i = 0; i < 20; i++){
-        platforms.push(new Block(new p5.Vector(platformX, platformY), platformWidth, playformVel))
-        platformY += platformHeight*2
-        platformX += platformWidth
-    }
+    let platformSpeed = -1
+    let playformVel = new p5.Vector(platformSpeed, 0) // Moving to the left
+    
+    // Ball position after interval frames
+    // X position is simple how much the frame is translated to left
+    // so this this frams ends up under the ball
+    let platformX = ball.position.x + platformSpeed * interval* -1
+    // Y position is calculated by s = s0 + ut + 0.5at^2
+    let platformY = ball.position.y + ball.velocity.y * interval + 0.5 * ball.g * interval * interval
+    platforms.push(new Block(new p5.Vector(platformX, platformY), platformWidth, playformVel))
 }
 
 function draw()
@@ -64,12 +74,41 @@ function draw()
             if(ball.checkPlatformCollision(platform.position.x, platform.position.y-platform.height/2, platform.width)){
                 // ball.stopBallIfNeeded()
                 platform.col = [random(0, 255), random(0, 255), random(0, 255)]
+                let nextInterval = 150
+                generateNextPlatform(ball, nextInterval)
+                translateSpeed = calculateTranslateSpeed(platforms, nextInterval)
+                // Make sound beep
+                note.play()
+
             }
+            // Move each platform up by translateSpeed
+            platform.position.y -= translateSpeed
         })
         ball.update()
         ball.display()
 
+        // Move each ball up by translateSpeed
+        ball.position.y -= translateSpeed
+
+        // Move each of the ball tails up by translateSpeed
+        ball.tail.forEach(tail => {
+            tail.y -= translateSpeed
+        })
     })
 
+}
 
+function calculateTranslateSpeed(platforms, interval){
+    // Calculate the speed of the frame translation
+    // so that the next platform will be in the middle of the screen
+    // at the time of collision
+    // Y axis only since X is constant for the ball
+    let ball = balls[0]
+    let platform = platforms[platforms.length-1]
+    let platformY = platform.position.y
+    let middle = height/2
+    let dy = platformY - middle
+    let t = interval
+    let translateSpeed = dy/t
+    return translateSpeed
 }
