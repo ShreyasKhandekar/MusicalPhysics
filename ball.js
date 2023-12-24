@@ -33,18 +33,32 @@ class Ball {
 
 	}
 
-    checkPlatformCollision(platformX, platformY, platformWidth) {
-        let playformLeftEnd = platformX - platformWidth/2
-        let playformRightEnd = platformX + platformWidth/2
-        if (this.position.y > platformY - this.radius /* ball  below platform*/&&
-            this.position.x > playformLeftEnd && this.position.x < playformRightEnd) {
-            console.log("Collision with platform")
-            // Collision with platform
-            this.position.y = platformY - this.radius // Correct position to avoid overlap
-            this.velocity.y *= -1 * this.elasticity // Reverse y velocity
-            this.col = [random(0, 255), random(0, 255), random(0, 255)]
-            return true
-        }
+    checkPlatformCollision(block) {
+        if (this.position.x > block.leftEnd && this.position.x < block.rightEnd) {
+			let collision = false
+			// Ball is in the same x position as the platform
+			// Check collision from the top of the platform
+			if(this.position.y + this.radius > block.topSurface /* below top surface */
+			   && this.position.y + this.radius < block.bottomSurface /* above bottom surface */
+			   && this.velocity.y > 0 /* ball moving down */) {
+				this.position.y = block.position.y - this.radius // Correct position to avoid overlap
+				collision = true
+			}
+			// Check collision with the bottom of the platform
+			if(this.position.y - this.radius < block.bottomSurface /* above bottom surface */
+			   && this.position.y - this.radius > block.topSurface /* below top surface */
+			   && this.velocity.y < 0 /* ball moving up */) {
+				this.position.y = block.position.y + this.radius // Correct position to avoid overlap
+				collision = true
+			   }
+			if(collision) {
+				console.log("Collision with platform")
+				// Collision with platform
+				this.velocity.y *= -1 * this.elasticity // Reverse y velocity
+				this.col = [random(0, 255), random(0, 255), random(0, 255)]
+				return true
+			}
+		}
         return false
     }
 

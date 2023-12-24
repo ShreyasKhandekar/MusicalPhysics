@@ -11,11 +11,19 @@ class Block {
         this.height = 20
 		this.col = [255, 255, 255]
         this.topSurface = this.position.y - this.height/2
+		this.bottomSurface = this.position.y + this.height/2
+		this.leftEnd = this.position.x - this.width/2
+		this.rightEnd = this.position.x + this.width/2
 	}
+	
 	update() {
-        // Add gravity
 		this.position.add(this.velocity)
+		this.topSurface = this.position.y - this.height/2
+		this.bottomSurface = this.position.y + this.height/2
+		this.leftEnd = this.position.x - this.width/2
+		this.rightEnd = this.position.x + this.width/2
 	}
+
 	display() {
         noStroke()
 		fill(this.col[0], this.col[1], this.col[2])

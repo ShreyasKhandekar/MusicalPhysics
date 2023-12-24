@@ -71,10 +71,10 @@ function draw()
     balls.forEach(ball => {
         // Check collision with platforms
         platforms.forEach(platform => {
-            if(ball.checkPlatformCollision(platform.position.x, platform.position.y-platform.height/2, platform.width)){
+            if(ball.checkPlatformCollision(platform)){
                 // ball.stopBallIfNeeded()
                 platform.col = [random(0, 255), random(0, 255), random(0, 255)]
-                let nextInterval = 150
+                let nextInterval = 50
                 generateNextPlatform(ball, nextInterval)
                 translateSpeed = calculateTranslateSpeed(platforms, nextInterval)
                 // Make sound beep
